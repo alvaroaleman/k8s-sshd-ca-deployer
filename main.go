@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	//"fmt"
+	"io/ioutil"
 	"log"
 )
 
@@ -23,4 +24,12 @@ func main() {
 	} else if restartCommand == "" {
 		log.Fatal("restart-command parameter must not be empty!")
 	}
+
+	sshdConfigRaw, err := ioutil.ReadFile(SSHDConfigPath)
+	if err != nil {
+		log.Fatalf("Error reading sshd config: '%v'", err)
+	}
+
+	sshdConfig := string(sshdConfigRaw)
+	log.Println(sshdConfig)
 }
