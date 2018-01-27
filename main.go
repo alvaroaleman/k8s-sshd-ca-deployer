@@ -89,13 +89,16 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error writing sshd config: '%v'", err)
 		}
+		log.Println("Successfully altered sshd config...")
 
+		log.Println("Going to restart sshd....")
 		cmdSlice := strings.Split(restartCommand, " ")
 		cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
 		output, err := cmd.CombinedOutput()
 		if err != nil {
 			log.Fatalf("Error executing restart command '%s': '%v'\nOutput: %s", restartCommand, err, output)
 		}
+		log.Println("Successfully reconfigured sshd!")
 	} else {
 		log.Println("Config already correct, nothing to do...")
 	}

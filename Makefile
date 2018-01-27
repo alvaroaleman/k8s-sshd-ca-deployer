@@ -1,5 +1,5 @@
 k8s-sshd-ca-deployer: main.go
-	CGO_ENABLED=0 go build .
+	CGO_ENABLED=0 go build -ldflags '-s -w' .
 
 bash_unit:
 	curl -LO https://raw.githubusercontent.com/pgrange/bash_unit/v1.6.0/bash_unit

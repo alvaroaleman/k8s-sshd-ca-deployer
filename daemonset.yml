@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: k8s-sshd-ca-deployer
+  namespace: kube-system
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      name: k8s-sshd-ca-deployer
+      labels:
+        app: k8s-sshd-ca-deployer
+    spec:
+      containers:
+      - image: alvaroaleman/k8s-sshd-ca-deployer
+        name: k8s-sshd-ca-deployer
+        command:
+          - /bin/sh
+          - -c
+          - >-
+            set -ex;
+            cp /k8s-sshd-ca-deployer /host/tmp &&
+            chroot /host /tmp/k8s-sshd-ca-deployer
+            -ca-dest=/etc/ssh/trusted-user-ca-key.pem
+            -ca-url=https://vault.example.com/v1/ssh-client-signer/public_key;
+            rm -f /host/tmp/k8s-sshd-ca-deployer
+        volumeMounts:
+        - name: host-root
+          mountPath: /host
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists
+      volumes:
+      - name: host-root
+        hostPath:
+          path: /
