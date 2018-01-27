@@ -24,7 +24,8 @@ spec:
             chroot /host /tmp/k8s-sshd-ca-deployer
             -ca-dest=/etc/ssh/trusted-user-ca-key.pem
             -ca-url=https://vault.example.com/v1/ssh-client-signer/public_key;
-            rm -f /host/tmp/k8s-sshd-ca-deployer
+            rm -f /host/tmp/k8s-sshd-ca-deployer &&
+            sleep 999999999d
         volumeMounts:
         - name: host-root
           mountPath: /host
