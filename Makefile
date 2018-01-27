@@ -21,3 +21,8 @@ fixture-container:
 
 clean:
 	-docker rm -f k8s-sshd-ca-deployer-fixture-container
+
+
+docker_image:
+	docker build -t alvaroaleman/k8s-sshd-ca-deployer .
+	docker push alvaroaleman/k8s-sshd-ca-deployer
