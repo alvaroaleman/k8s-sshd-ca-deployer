@@ -5,6 +5,8 @@ import (
 	//"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"os"
 )
 
 func main() {
@@ -23,6 +25,22 @@ func main() {
 		log.Fatal("sshd-config-path parameter must not be empty!")
 	} else if restartCommand == "" {
 		log.Fatal("restart-command parameter must not be empty!")
+	}
+
+	resp, err := http.Get(CAURL)
+	if err != nil {
+		log.Fatalf("Error downloading CACert: '%v'", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Error reading certificate body: '%v'", err)
+	}
+
+	err = ioutil.WriteFile(CADest, []byte(body), os.FileMode(int(0600)))
+	if err != nil {
+		log.Fatalf("Error writing CACert: '%v'", err)
 	}
 
 	sshdConfigRaw, err := ioutil.ReadFile(SSHDConfigPath)

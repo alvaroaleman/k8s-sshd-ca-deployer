@@ -1,2 +1,5 @@
 k8s-sshd-ca-deployer
 bash_unit
+test/fixtures/empty/*
+
+!.gitkeep
