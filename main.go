@@ -2,12 +2,16 @@ package main
 
 import (
 	"flag"
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 )
+
+const sshdCaCertParamName = "TrustedUserCAKeys"
 
 func main() {
 	var CAURL, CADest, SSHDConfigPath, restartCommand string
@@ -25,6 +29,16 @@ func main() {
 		log.Fatal("sshd-config-path parameter must not be empty!")
 	} else if restartCommand == "" {
 		log.Fatal("restart-command parameter must not be empty!")
+	}
+
+	CADest, err := filepath.Abs(CADest)
+	if err != nil {
+		log.Fatalf("Error converting ca-dest to absolute path: '%v'", err)
+	}
+
+	SSHDConfigPath, err = filepath.Abs(SSHDConfigPath)
+	if err != nil {
+		log.Fatalf("Error converting sshd-config-path to absolue path: 'v'", err)
 	}
 
 	resp, err := http.Get(CAURL)
@@ -49,5 +63,32 @@ func main() {
 	}
 
 	sshdConfig := string(sshdConfigRaw)
-	log.Println(sshdConfig)
+	var newSSHDConfig string
+
+	sshdConfigLine := fmt.Sprintf("%s %s", sshdCaCertParamName, CADest)
+
+	if !strings.Contains(sshdConfig, sshdCaCertParamName) {
+		newSSHDConfig = fmt.Sprintf("%s\n%s", sshdConfigLine, sshdConfig)
+	} else if strings.Contains(sshdConfig, sshdCaCertParamName) && !strings.Contains(sshdConfig, sshdConfigLine) {
+		lines := strings.Split(sshdConfig, "\n")
+		var finalConfig []string
+		finalConfig = append(finalConfig, sshdConfigLine)
+		for _, line := range lines {
+			if !strings.Contains(line, sshdCaCertParamName) {
+				finalConfig = append(finalConfig, line)
+			}
+		}
+		newSSHDConfig = strings.Join(finalConfig, "\n")
+	} else if strings.Contains(sshdConfig, sshdConfigLine) {
+		newSSHDConfig = sshdConfig
+	}
+
+	if newSSHDConfig != sshdConfig {
+		err = ioutil.WriteFile(SSHDConfigPath, []byte(newSSHDConfig), os.FileMode(int(0600)))
+		if err != nil {
+			log.Fatalf("Error writing sshd config: '%v'", err)
+		}
+	} else {
+		log.Println("Config already correct, nothing to do...")
+	}
 }
