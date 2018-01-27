@@ -8,3 +8,16 @@ bash_unit:
 .PHONY: test
 test: bash_unit k8s-sshd-ca-deployer
 	./bash_unit test/integration.sh
+
+
+fixture-container:
+	@if ! docker ps|grep -q k8s-sshd-ca-deployer-fixture-container; then\
+		docker run -d \
+			-v $$PWD/test/fixtures:/usr/share/nginx/html:ro \
+			-p 80:80 \
+			--name=k8s-sshd-ca-deployer-fixture-container \
+			nginx &>/dev/null; \
+	fi
+
+clean:
+	-docker rm -f k8s-sshd-ca-deployer-fixture-container
