@@ -5,8 +5,8 @@ setup_suite(){
   rm -f test/fixtures/empty/*
   git checkout HEAD test/fixtures/sshd_with_ca
   git checkout HEAD test/fixtures/sshd_without_ca
-  ./k8s-sshd-ca-deployer -ca-url=http://127.0.0.1:80/ca.pem -ca-dest=test/fixtures/empty/cacert -sshd-config-path=test/fixtures/sshd_with_ca
-  ./k8s-sshd-ca-deployer -ca-url=http://127.0.0.1:80/ca.pem -ca-dest=test/fixtures/empty/cacert -sshd-config-path=test/fixtures/sshd_without_ca
+  ./k8s-sshd-ca-deployer -ca-url=http://127.0.0.1:80/ca.pem -ca-dest=test/fixtures/empty/cacert -sshd-config-path=test/fixtures/sshd_with_ca -restart-command="touch test/fixtures/empty/c1"
+  ./k8s-sshd-ca-deployer -ca-url=http://127.0.0.1:80/ca.pem -ca-dest=test/fixtures/empty/cacert -sshd-config-path=test/fixtures/sshd_without_ca -restart-command="touch test/fixtures/empty/c2"
 }
 
 teardown_suite(){
@@ -24,4 +24,9 @@ test_alter_sshd_with_ca_config(){
 
 test_alter_sshd_without_ca_config(){
   assert "head -n 1 test/fixtures/sshd_without_ca|egrep 'TrustedUserCAKeys .*/k8s-sshd-ca-deployer/test/fixtures/empty/cacert'"
+}
+
+test_command_execution(){
+  assert "ls test/fixtures/empty/c1"
+  assert "ls test/fixtures/empty/c2"
 }

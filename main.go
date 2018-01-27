@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -87,6 +88,13 @@ func main() {
 		err = ioutil.WriteFile(SSHDConfigPath, []byte(newSSHDConfig), os.FileMode(int(0600)))
 		if err != nil {
 			log.Fatalf("Error writing sshd config: '%v'", err)
+		}
+
+		cmdSlice := strings.Split(restartCommand, " ")
+		cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Fatalf("Error executing restart command '%s': '%v'\nOutput: %s", restartCommand, err, output)
 		}
 	} else {
 		log.Println("Config already correct, nothing to do...")
