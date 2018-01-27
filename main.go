@@ -85,6 +85,21 @@ func main() {
 	}
 
 	if newSSHDConfig != sshdConfig {
+		// Check if symlink, if yes remove first, otherwise
+		// config is not written to SSHDConfigPath but to the target of the symlink
+		fi, err := os.Lstat(SSHDConfigPath)
+		if err != nil {
+			log.Fatalf("Error reading Lstat of file '%s': '%v'", SSHDConfigPath, err)
+		}
+		mode := fi.Mode()
+		if mode&os.ModeSymlink != 0 {
+			log.Printf("SSHD config at '%s' is a symlink, removing it before trying to write...", SSHDConfigPath)
+			err = os.Remove(SSHDConfigPath)
+			if err != nil {
+				log.Fatalf("Error removing SSHD config symlink: '%v'", err)
+			}
+			log.Println("Successfully removed sshd config symlink!")
+		}
 		err = ioutil.WriteFile(SSHDConfigPath, []byte(newSSHDConfig), os.FileMode(int(0600)))
 		if err != nil {
 			log.Fatalf("Error writing sshd config: '%v'", err)
