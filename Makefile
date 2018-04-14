@@ -24,5 +24,5 @@ clean:
 
 
 docker_image:
-	docker build -t alvaroaleman/k8s-sshd-ca-deployer .
-	docker push alvaroaleman/k8s-sshd-ca-deployer
+	docker build -t alvaroaleman/k8s-sshd-ca-deployer:$(shell cat VERSION) .
+	docker push alvaroaleman/k8s-sshd-ca-deployer:$(shell cat VERSION)
